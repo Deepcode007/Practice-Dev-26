@@ -1,0 +1,83 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum role{
+  USER
+  SERVICE_PROVIDER
+}
+
+enum type{
+  MEDICAL
+  HOUSE_HELP
+  BEAUTY
+  FITNESS
+  EDUCATION
+  OTHER
+}
+
+model user{
+  id String @id @default(uuid())
+  name String
+  email String @unique
+  password String
+  role role
+  createdAt DateTime @default(now())
+  
+  services service[]
+  appointments appointment[]
+}
+
+model service{
+  id String @id @default(uuid())
+  name String
+  type type
+  providerId String
+  provider user @relation(references: [id], fields: [providerId])
+  durationMinutes Int
+  createdAt DateTime @default(now())
+
+  availability availability[]
+  appointments appointment[]
+}
+
+model availability{
+  id String @id @default(uuid())
+  serviceId String
+  service service @relation(references: [id], fields: [serviceId])
+  dayOfWeek Int
+  startTime String
+  endTime String
+}
+
+
+enum status{
+  BOOKED
+  CANCELLED
+}
+
+model appointment{
+  id String @id @default(uuid())
+  userId String
+  user user @relation(references: [id], fields: [userId])
+  serviceId String
+  service service @relation(references: [id], fields: [serviceId])
+  date String
+  slotId String
+  startTime String
+  endTime String
+
+  status status
+  createdAt DateTime @default(now())
+}
